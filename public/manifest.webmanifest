@@ -1,0 +1,26 @@
+{
+  "name": "Stillpoint — meditation that sticks",
+  "short_name": "Stillpoint",
+  "description": "Short guided meditations with animated technique guides and progress you can see.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "categories": ["health", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

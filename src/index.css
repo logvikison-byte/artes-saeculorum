@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-30px) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(50vh) rotate(200deg);
+    opacity: 0;
+  }
+}
+
+.animate-confetti {
+  animation: confetti-fall 2.6s ease-in forwards;
+  top: 0;
+}
