@@ -1,9 +1,34 @@
+import { useEffect } from 'react';
 import { HashRouter, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import SessionPlayer from './pages/SessionPlayer';
 import TechniqueLibrary from './pages/TechniqueLibrary';
 import ProgressPage from './pages/ProgressPage';
 import Settings from './pages/Settings';
+import { useStore } from './store/useStore';
+import { getTheme } from './lib/themes';
+
+/** While the app is open, fire the daily reminder notification at the chosen time. */
+function useReminder() {
+  const reminder = useStore((s) => s.settings.reminder);
+  useEffect(() => {
+    if (!reminder.enabled) return;
+    const check = () => {
+      const now = new Date();
+      const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const todayKey = `stillpoint-reminded-${now.toDateString()}`;
+      if (hhmm === reminder.time && !localStorage.getItem(todayKey) && Notification.permission === 'granted') {
+        localStorage.setItem(todayKey, '1');
+        new Notification('Time for a moment of calm 🪷', {
+          body: 'Even one minute counts. Your streak is waiting.',
+        });
+      }
+    };
+    check();
+    const interval = window.setInterval(check, 30_000);
+    return () => window.clearInterval(interval);
+  }, [reminder.enabled, reminder.time]);
+}
 
 const NAV = [
   { to: '/', label: 'Home', icon: '🏠' },
@@ -15,9 +40,11 @@ const NAV = [
 function Shell() {
   const location = useLocation();
   const inSession = location.pathname.startsWith('/session');
+  const themeId = useStore((s) => s.settings.theme);
+  useReminder();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-200">
+    <div className="min-h-screen text-slate-200" style={{ background: getTheme(themeId).background }}>
       <div className="max-w-2xl mx-auto px-4 pb-28 pt-4">
         {!inSession && (
           <div className="flex items-center gap-2 mb-2">

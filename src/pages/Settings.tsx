@@ -1,16 +1,28 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { formatDuration } from '../components/shared';
+import { THEMES } from '../lib/themes';
 
 const DURATIONS = [60, 180, 300, 600];
 
 export default function Settings() {
-  const { soundOn, defaultDurationSec } = useStore((s) => s.settings);
+  const { soundOn, defaultDurationSec, theme, reminder } = useStore((s) => s.settings);
   const setSoundOn = useStore((s) => s.setSoundOn);
   const setDefaultDuration = useStore((s) => s.setDefaultDuration);
+  const setTheme = useStore((s) => s.setTheme);
+  const setReminder = useStore((s) => s.setReminder);
   const resetAll = useStore((s) => s.resetAll);
   const sessions = useStore((s) => s.sessions);
   const [confirmReset, setConfirmReset] = useState(false);
+
+  const toggleReminder = async () => {
+    if (!reminder.enabled) {
+      if (!('Notification' in window)) return;
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+    }
+    setReminder({ ...reminder, enabled: !reminder.enabled });
+  };
 
   const exportData = () => {
     const blob = new Blob([JSON.stringify({ sessions }, null, 2)], { type: 'application/json' });
@@ -61,6 +73,62 @@ export default function Settings() {
               </button>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-3xl bg-slate-800/60 border border-slate-700/60 p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-slate-200 font-medium">Daily reminder</div>
+            <div className="text-sm text-slate-500">
+              A gentle nudge while the app is open in a tab
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {reminder.enabled && (
+              <input
+                type="time"
+                value={reminder.time}
+                onChange={(e) => setReminder({ ...reminder, time: e.target.value })}
+                className="bg-slate-900/60 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-slate-200"
+              />
+            )}
+            <button
+              onClick={toggleReminder}
+              className={`w-14 h-8 rounded-full transition relative shrink-0 ${reminder.enabled ? 'bg-emerald-500' : 'bg-slate-700'}`}
+            >
+              <span
+                className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-all ${reminder.enabled ? 'left-7' : 'left-1'}`}
+              />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-3xl bg-slate-800/60 border border-slate-700/60 p-5">
+        <div className="text-slate-200 font-medium mb-1">Theme</div>
+        <div className="text-sm text-slate-500 mb-3">New scenes unlock as you practice</div>
+        <div className="grid grid-cols-2 gap-3">
+          {THEMES.map((t) => {
+            const unlocked = t.unlocked(sessions);
+            const active = theme === t.id;
+            return (
+              <button
+                key={t.id}
+                disabled={!unlocked}
+                onClick={() => setTheme(t.id)}
+                className={`rounded-2xl border p-3 text-left transition ${
+                  active ? 'border-sky-400' : unlocked ? 'border-slate-700 hover:border-slate-500' : 'border-slate-800 opacity-50'
+                }`}
+              >
+                <div className="h-10 rounded-lg mb-2" style={{ background: t.background }} />
+                <div className="text-sm text-slate-200">
+                  {t.emoji} {t.name} {active && '✓'}
+                </div>
+                <div className="text-xs text-slate-500">{unlocked ? t.hint : `🔒 ${t.hint}`}</div>
+              </button>
+            );
+          })}
         </div>
       </section>
 

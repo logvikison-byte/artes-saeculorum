@@ -1,5 +1,5 @@
 import type { Mood, Session, Technique } from '../types';
-import { TECHNIQUES } from '../data/techniques';
+import { unlockedTechniques } from './unlocks';
 
 /**
  * Rules-based technique suggestion (see PLAN.md §2.2):
@@ -15,9 +15,10 @@ export function suggestTechnique(
 ): Technique {
   const completed = sessions.filter((s) => s.completed);
   const lastId = completed.length > 0 ? completed[completed.length - 1].techniqueId : null;
+  const available = unlockedTechniques(sessions);
 
-  let pool = TECHNIQUES.filter((t) => t.id !== lastId);
-  if (pool.length === 0) pool = [...TECHNIQUES];
+  let pool = available.filter((t) => t.id !== lastId);
+  if (pool.length === 0) pool = [...available];
 
   if (timeSec !== null) {
     const fitting = pool.filter((t) => t.durations.some((d) => d <= timeSec));
@@ -55,7 +56,8 @@ export function dailySuggestion(sessions: Session[]): Technique {
   const seed = today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate();
   const completed = sessions.filter((s) => s.completed);
   const lastId = completed.length > 0 ? completed[completed.length - 1].techniqueId : null;
-  const pool = TECHNIQUES.filter((t) => t.id !== lastId);
-  const list = pool.length > 0 ? pool : TECHNIQUES;
+  const available = unlockedTechniques(sessions);
+  const pool = available.filter((t) => t.id !== lastId);
+  const list = pool.length > 0 ? pool : available;
   return list[seed % list.length];
 }

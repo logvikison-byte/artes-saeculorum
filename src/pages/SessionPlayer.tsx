@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore';
 import { playChime } from '../lib/chime';
 import { MOODS, FEELING_SCALE, formatDuration } from '../components/shared';
 import { currentStreak, totalMinutes } from '../lib/stats';
+import { newlyUnlocked } from '../lib/unlocks';
 import type { Rating, Technique } from '../types';
 
 type Stage = 'preview' | 'active' | 'checkin' | 'done';
@@ -60,7 +61,7 @@ function SessionFlow({ technique }: { technique: Technique }) {
     );
   if (stage === 'checkin' && sessionId)
     return <CheckIn sessionId={sessionId} elapsedSec={elapsedSec} onDone={() => setStage('done')} />;
-  return <Celebration technique={technique} />;
+  return <Celebration technique={technique} sessionId={sessionId} />;
 }
 
 /** Live animated demo of the guide, so users learn by watching — no reading required. */
@@ -215,12 +216,16 @@ function CheckIn({ sessionId, elapsedSec, onDone }: {
   );
 }
 
-function Celebration({ technique }: { technique: Technique }) {
+function Celebration({ technique, sessionId }: { technique: Technique; sessionId: string | null }) {
   const navigate = useNavigate();
   const sessions = useStore((s) => s.sessions);
   const freezes = useStore((s) => s.streakFreezesAvailable);
   const streak = currentStreak(sessions, freezes);
   const minutes = totalMinutes(sessions);
+  const unlocked = useMemo(
+    () => (sessionId ? newlyUnlocked(sessions, sessionId) : []),
+    [sessions, sessionId],
+  );
   const confetti = useMemo(
     () => Array.from({ length: 24 }, (_, i) => ({
       left: (i * 37 + 13) % 100,
@@ -248,6 +253,20 @@ function Celebration({ technique }: { technique: Technique }) {
         Your streak is now <span className="text-orange-300 font-semibold">{streak} day{streak === 1 ? '' : 's'}</span> and
         you’ve meditated <span className="text-emerald-300 font-semibold">{minutes} minutes</span> in total.
       </p>
+      {unlocked.map((t) => (
+        <button
+          key={t.id}
+          onClick={() => navigate(`/session/${t.id}?duration=180`)}
+          className="rounded-2xl border px-5 py-4 text-left hover:bg-slate-800/60 transition"
+          style={{ borderColor: `${t.color}88`, background: `${t.color}11` }}
+        >
+          <div className="text-xs uppercase tracking-widest" style={{ color: t.color }}>
+            🔓 New technique unlocked
+          </div>
+          <div className="text-lg font-semibold text-slate-100 mt-1">{t.name}</div>
+          <div className="text-sm text-slate-400">{t.tagline} — tap to try it</div>
+        </button>
+      ))}
       <div className="flex gap-3">
         <button
           onClick={() => navigate('/progress')}

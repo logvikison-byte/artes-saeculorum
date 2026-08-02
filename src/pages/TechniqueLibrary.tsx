@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { TECHNIQUES } from '../data/techniques';
 import { useStore } from '../store/useStore';
 import { formatDuration } from '../components/shared';
+import { isUnlocked } from '../lib/unlocks';
 
 const FAMILY_LABEL: Record<string, string> = {
   breath: 'Breathing',
@@ -31,6 +32,21 @@ export default function TechniqueLibrary() {
       <div className="grid gap-4 sm:grid-cols-2">
         {TECHNIQUES.map((t) => {
           const timesUsed = counts.get(t.id) ?? 0;
+          if (!isUnlocked(t, sessions)) {
+            return (
+              <div
+                key={t.id}
+                className="rounded-3xl border border-dashed border-slate-700 bg-slate-900/30 p-5 flex flex-col items-center justify-center text-center"
+              >
+                <div className="text-3xl mb-2">🔒</div>
+                <h2 className="text-lg font-semibold text-slate-400">{t.name}</h2>
+                <p className="text-sm text-slate-500 mt-1">{t.tagline}</p>
+                <p className="text-xs mt-3 px-3 py-1.5 rounded-full border border-slate-700 text-slate-400">
+                  {t.unlock!.hint} to unlock
+                </p>
+              </div>
+            );
+          }
           return (
             <Link
               key={t.id}
@@ -62,13 +78,6 @@ export default function TechniqueLibrary() {
             </Link>
           );
         })}
-        <div className="rounded-3xl border border-dashed border-slate-700 p-5 flex flex-col items-center justify-center text-center text-slate-500">
-          <div className="text-3xl mb-2">🔒</div>
-          <p className="text-sm">
-            Loving-Kindness, Candle Gazing, 5-4-3-2-1 Grounding and Walking Meditation
-            unlock as your streak grows. Keep going.
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import {
 import { getTechnique } from '../data/techniques';
 import { StatCard, FEELING_SCALE, formatDuration } from '../components/shared';
 import Heatmap from '../components/Heatmap';
+import TrendChart from '../components/TrendChart';
 
 const MILESTONES = [
   { emoji: '🌱', name: 'First sit', test: (c: Ctx) => c.count >= 1 },
@@ -29,6 +30,7 @@ export default function ProgressPage() {
   };
   const shift = averageMoodShift(sessions);
   const recent = [...done].reverse().slice(0, 8);
+  const trendWindow = done.slice(-20);
 
   return (
     <div className="space-y-6">
@@ -59,6 +61,26 @@ export default function ProgressPage() {
             </span>{' '}
             better after meditating than before. That shift is the whole point — and it compounds.
           </p>
+          <div className="mt-4">
+            <TrendChart
+              series={[
+                { label: 'mood before', color: '#64748b', values: trendWindow.map((s) => s.moodBefore ?? null) },
+                { label: 'mood after', color: '#f472b6', values: trendWindow.map((s) => s.moodAfter ?? null) },
+              ]}
+            />
+          </div>
+        </section>
+      )}
+
+      {trendWindow.some((s) => s.focusRating !== undefined) && (
+        <section className="rounded-3xl bg-slate-800/60 border border-slate-700/60 p-5">
+          <h2 className="text-lg font-semibold text-slate-200 mb-2">Focus over time</h2>
+          <p className="text-sm text-slate-500 mb-3">Your last {trendWindow.length} sessions. Ups and downs are normal — the trend is what matters.</p>
+          <TrendChart
+            series={[
+              { label: 'focus', color: '#34d399', values: trendWindow.map((s) => s.focusRating ?? null) },
+            ]}
+          />
         </section>
       )}
 

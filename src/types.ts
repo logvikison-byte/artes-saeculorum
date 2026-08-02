@@ -24,6 +24,19 @@ export type TechniqueFamily =
   | 'compassion'
   | 'movement';
 
+export interface UnlockContext {
+  sessionCount: number;
+  totalMinutes: number;
+  longestStreak: number;
+  techniquesTried: number;
+}
+
+export interface UnlockRule {
+  /** Shown on the locked card, e.g. "Complete 3 sessions". */
+  hint: string;
+  test: (ctx: UnlockContext) => boolean;
+}
+
 export interface Technique {
   id: string;
   name: string;
@@ -37,6 +50,8 @@ export interface Technique {
   /** Suggested session lengths in seconds. */
   durations: number[];
   color: string;
+  /** Absent = available from day one. */
+  unlock?: UnlockRule;
 }
 
 export interface Session {
