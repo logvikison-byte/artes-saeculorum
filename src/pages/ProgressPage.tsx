@@ -7,6 +7,7 @@ import { getTechnique } from '../data/techniques';
 import { StatCard, FEELING_SCALE, formatDuration } from '../components/shared';
 import Heatmap from '../components/Heatmap';
 import TrendChart from '../components/TrendChart';
+import WeeklyRecap from '../components/WeeklyRecap';
 
 const MILESTONES = [
   { emoji: '🌱', name: 'First sit', test: (c: Ctx) => c.count >= 1 },
@@ -45,6 +46,8 @@ export default function ProgressPage() {
         <StatCard value={String(ctx.minutes)} label="lifetime minutes" accent="#34d399" />
         <StatCard value={String(ctx.count)} label="sessions" accent="#38bdf8" />
       </div>
+
+      <WeeklyRecap />
 
       <section className="rounded-3xl bg-slate-800/60 border border-slate-700/60 p-5">
         <h2 className="text-lg font-semibold text-slate-200 mb-3">Practice calendar</h2>

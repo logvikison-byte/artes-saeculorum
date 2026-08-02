@@ -8,3 +8,12 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 );
+
+// Offline support: sessions keep working with no network after the first visit.
+if ('serviceWorker' in navigator && location.protocol !== 'blob:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
+      // Registration fails on unsupported/insecure origins — the app still works.
+    });
+  });
+}

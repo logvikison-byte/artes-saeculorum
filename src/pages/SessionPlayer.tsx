@@ -30,6 +30,7 @@ function SessionFlow({ technique }: { technique: Technique }) {
   const durationSec = Number(search.get('duration')) || 180;
   const moodKey = search.get('mood');
   const moodBefore = MOODS.find((m) => m.key === moodKey)?.rating;
+  const reason = search.get('reason');
 
   const [stage, setStage] = useState<Stage>('preview');
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -50,7 +51,8 @@ function SessionFlow({ technique }: { technique: Technique }) {
     setStage('active');
   };
 
-  if (stage === 'preview') return <Preview technique={technique} durationSec={durationSec} onBegin={begin} />;
+  if (stage === 'preview')
+    return <Preview technique={technique} durationSec={durationSec} reason={reason} onBegin={begin} />;
   if (stage === 'active' && sessionId)
     return (
       <Active
@@ -65,8 +67,8 @@ function SessionFlow({ technique }: { technique: Technique }) {
 }
 
 /** Live animated demo of the guide, so users learn by watching — no reading required. */
-function Preview({ technique, durationSec, onBegin }: {
-  technique: Technique; durationSec: number; onBegin: () => void;
+function Preview({ technique, durationSec, reason, onBegin }: {
+  technique: Technique; durationSec: number; reason: string | null; onBegin: () => void;
 }) {
   const [engine] = usePhaseEngine(technique.phases, 3600, 'loop');
   const Guide = GUIDES[technique.id];
@@ -76,6 +78,11 @@ function Preview({ technique, durationSec, onBegin }: {
       <div>
         <h1 className="text-2xl font-bold" style={{ color: technique.color }}>{technique.name}</h1>
         <p className="text-slate-400 text-sm mt-1">{technique.tagline} · {formatDuration(durationSec)}</p>
+        {reason && (
+          <p className="mt-2 inline-block text-xs px-3 py-1 rounded-full border border-slate-700 bg-slate-800/60 text-slate-400">
+            ✨ Picked for you — {reason}
+          </p>
+        )}
       </div>
       <div className="relative">
         <Guide engine={engine} />

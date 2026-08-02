@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { currentStreak, totalMinutes, practiceDays, dayKey } from '../lib/stats';
-import { suggestTechnique, dailySuggestion } from '../lib/suggest';
+import { suggestWithReason, dailySuggestion } from '../lib/suggest';
 import { MOODS, StatCard, formatDuration } from '../components/shared';
 import type { Mood } from '../types';
 
@@ -22,8 +22,8 @@ export default function Dashboard() {
   const lapsed = !practicedToday && sessions.length > 0 && streak === 0 && minutes > 0;
 
   const startSuggested = () => {
-    const technique = suggestTechnique(sessions, mood, duration);
-    const params = new URLSearchParams({ duration: String(duration) });
+    const { technique, reason } = suggestWithReason(sessions, mood, duration);
+    const params = new URLSearchParams({ duration: String(duration), reason });
     if (mood) params.set('mood', mood);
     navigate(`/session/${technique.id}?${params}`);
   };

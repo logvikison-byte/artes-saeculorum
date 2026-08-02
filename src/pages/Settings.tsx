@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { formatDuration } from '../components/shared';
 import { THEMES } from '../lib/themes';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 const DURATIONS = [60, 180, 300, 600];
 
@@ -14,6 +15,7 @@ export default function Settings() {
   const resetAll = useStore((s) => s.resetAll);
   const sessions = useStore((s) => s.sessions);
   const [confirmReset, setConfirmReset] = useState(false);
+  const install = useInstallPrompt();
 
   const toggleReminder = async () => {
     if (!reminder.enabled) {
@@ -104,6 +106,23 @@ export default function Settings() {
           </div>
         </div>
       </section>
+
+      {install && (
+        <section className="rounded-3xl bg-slate-800/60 border border-slate-700/60 p-5 flex items-center justify-between gap-4">
+          <div>
+            <div className="text-slate-200 font-medium">Install Stillpoint</div>
+            <div className="text-sm text-slate-500">
+              Add it to your home screen — opens instantly and works offline
+            </div>
+          </div>
+          <button
+            onClick={install.promptInstall}
+            className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-slate-950 font-semibold text-sm hover:opacity-90 transition"
+          >
+            Install
+          </button>
+        </section>
+      )}
 
       <section className="rounded-3xl bg-slate-800/60 border border-slate-700/60 p-5">
         <div className="text-slate-200 font-medium mb-1">Theme</div>
